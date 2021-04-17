@@ -76,6 +76,5 @@ def main():
 
 try:
     main()
-    input("[+] Press any key to close... ")
 except Exception as es:
     print("[-] ", es)
