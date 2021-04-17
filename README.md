@@ -14,6 +14,10 @@
 				ip_address
 				mobile_number
 				country
+
+##  To install dependencies:
+`pip install -r requirements.txt`
+
 ## How to run script:
  `python bulkgenerator.py`
 
