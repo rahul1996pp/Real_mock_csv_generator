@@ -1,9 +1,9 @@
-import concurrent.futures
 import csv
-import threading
-import time
-import pandas as pd
+from concurrent.futures import ThreadPoolExecutor
+from threading import Lock
+from time import time, perf_counter
 from faker import Faker
+from pandas import DataFrame
 
 
 def profile():
@@ -15,31 +15,32 @@ def profile():
     username = profile_data['username']
     gender = ''.join(["Male" if profile_data['sex'] == 'M' else "Female"])
     ip_address = fake.ipv4()
-    number = fake.numerify('(###)-###-####')
+    mobile_number = fake.numerify('(###)-###-####')
     country = fake.country()
     thread.locked()
     data_dict = {'name': [name], 'first_name': [first_name], 'last_name': [last_name], 'email': [email],
-                 'username': [username], 'gender': [gender], 'ip_address': [ip_address], 'number': [number], 'country': [country]}
-    data = pd.DataFrame(data_dict)
+                 'username': [username], 'gender': [gender], 'ip_address': [ip_address], 'mobile_number': [mobile_number],
+                 'country': [country]}
+    data = DataFrame(data_dict)
     data.to_csv(file_name, mode='a', header=False, index=False)
     thread.release()
 
 
 def make_file():
     global file_name
-    file_name = f'output_{time.perf_counter()}.csv'
-    headerList = ['name', 'first_name', 'last_name', 'email', 'username', 'gender', 'ip_address', 'mobile_number', 'country']
+    file_name = f'output_{perf_counter()}.csv'
+    headerList = ['name', 'first_name', 'last_name', 'email', 'username', 'gender', 'ip_address', 'mobile_number',
+                  'country']
     print("[+] Creating file with headers as :- ('name', 'first_name', 'last_name', 'email', 'username', 'gender', "
           "'ip_address', 'mobile_number', 'country)")
     with open(file_name, 'a', newline='') as f:
-        writer = csv.writer(f)
-        writer.writerow(headerList)
+        csv.writer(f).writerow(headerList)
 
 
 def multi_thread():
     global thread
-    thread = threading.Lock()
-    with concurrent.futures.ThreadPoolExecutor() as worker:
+    thread = Lock()
+    with ThreadPoolExecutor() as worker:
         for _ in range(number + 1):
             print("[*] Creating profiles - ", _, end='\r')
             worker.submit(profile)
@@ -68,13 +69,14 @@ def main():
     credits()
     number = int(input("[+] Enter the number of profiles to create :- "))
     make_file()
-    start_time = time.time()
+    start_time = time()
     multi_thread()
-    end_time = time.time()
+    end_time = time()
     print(f"\n[+] Total time taken is {(end_time - start_time):2f} sec")
 
 
 try:
     main()
+    input("[+] Press any key to close... ")
 except Exception as es:
     print("[-] ", es)
